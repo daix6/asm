@@ -1,3 +1,9 @@
+; 编写一个程序。
+; 先从键盘输入一个字符串（有英文字母，可能也有数字），然后显示其中数字符的个数、英文字母的个数和字符串的长度。
+; 字符串中不能有空格，若有将其删除，并将改变后的字符串按相反的顺序显示出来。
+; 输入第二个字符串，显示的时全都以‘*’显示，然后将输入的字符串与前面处理后的字符串比较是否相同。
+; 若相同，输出“Password Right!”，否则输出 “Password Error!”
+
 DATA1 SEGMENT
     MSG     DB "Please input a string(30 most): $"
     MSG1    DB "Number of letters: $"
@@ -6,21 +12,21 @@ DATA1 SEGMENT
     MSG4    DB "The result string: $"
     MSG5    DB "Please input the password: $"
     RIGHT   DB "Password Right!$"
-    WRONG   DB "Password Wrong!$"
-    CRLF    DB 0DH, 0AH, "$"                         ; 回车(0DH)、换行(0AH)符ASCII码
-    LETTER  DB 0                                     ; 计字符数
-    DIGIT   DB 0                                     ; 计数字数
-    COUNT   DB 0                                     ; 计字符串数
+    WRONG   DB "Password Error!$"
+    CRLF    DB 0DH, 0AH, "$"                            ; 回车(0DH)、换行(0AH)符ASCII码
+    LETTER  DB 0                                        ; 计字符数
+    DIGIT   DB 0                                        ; 计数字数
+    COUNT   DB 0                                        ; 计字符串数
 
-    BUF         DB 30                                ; 预定30个字符
-                DB ?                                 ; 实际输入的字符个数
-                DB 30 DUP ("$")                      ; 开辟30个字符缓冲区，存放输入的字符
-    PASSWORD    DB 30, ?, 30 DUP ("$")               ; 上面的简写形式，存放第一次输入的字符串
-    PASSWORD2   DB 30, ?, 30 DUP ("$")               ; 存放第二次输入的字符串
+    BUF         DB 30                                   ; 预定30个字符
+                DB ?                                    ; 实际输入的字符个数
+                DB 30 DUP ("$")                         ; 开辟30个字符缓冲区，存放输入的字符
+    PASSWORD    DB 30, ?, 30 DUP ("$")                  ; 上面的简写形式，存放第一次输入的字符串
+    PASSWORD2   DB 30, ?, 30 DUP ("$")                  ; 存放第二次输入的字符串
 DATA1 ENDS
 
 STACKSG SEGMENT
-    DB 30 DUP (0)                                    ; 栈顶指针，TOP 
+    DB 30 DUP (0)                                       ; 栈顶指针，TOP 
     TOP LABEL WORD
 STACKSG ENDS
 
@@ -28,6 +34,7 @@ CODES SEGMENT
     ASSUME DS:DATA1, CS:CODES, SS:STACKSG
 
 START:
+;**********************初始化*************************
     MOV AX, DATA1
     MOV DS, AX
     MOV ES, AX
@@ -40,14 +47,16 @@ START:
     MOV AH, 09H                                         ; 显示 MSG的内容
     INT 21H
 
+;**********************输入缓冲区并回显*************************
     LEA DX, BUF                                         ; 获取BUF缓冲区的地址
     MOV AH, 0AH                                         ; 键盘输入到缓冲区
     INT 21H
 
-    LEA DX, CRLF
+    LEA DX, CRLF                                        ; 换行
     MOV AH, 09H
     INT 21H
 
+;**********************这部分用以计数*************************
     MOV CL, BUF+1                                       ; 输入字符的实际个数
     LEA SI, BUF+2                                       ; 实际存放字符的首地址
     MOV DI, 2
@@ -84,36 +93,39 @@ DIGITS:
     JMP SPACE
 
 SPACE:
-    INC SI
-    DEC CL
-    JNZ AGAIN
+    INC SI                                              ; 下一个字符
+    DEC CL                                              ; 循环变量
+    JNZ AGAIN                                           ; 若CX=0停止循环
 
+;**********************显示计数结果*************************
 INFO:
-    LEA DX, MSG1
+    LEA DX, MSG1                                        ; 显示 MSG1的内容
     MOV AH, 09H
     INT 21H
 
-;***判断LETTER是否是两位数
+;***判断LETTER是否是两位数***
     MOV DL, LETTER
     CMP DL, 10
     JNL LETTER2
 
+;***若不是***
 LETTER1:
-    ADD DL, 30H
+    ADD DL, 30H                                         ; DL中存放LETTER，加上30H（即0的ASCII码）可显示数据
     MOV AH, 02H
     INT 21H
     JMP INFO2
 
+;***若是***
 LETTER2:
-    MOV AH, 0
-    MOV AL, LETTER
+    MOV AH, 0 
+    MOV AL, LETTER                                      ; AX里现在存了LETTER
     MOV BL, 10
-    DIV BL
-    MOV DX, AX
-    ADD DX, 3030H
-    MOV AH, 02H
+    DIV BL                                              ; AX / 10
+    MOV DX, AX                                          ; 商存在AL中，余数存在AH中。因为要用到AX，所以转移到DX中。
+    ADD DX, 3030H                                       ; 为了显示数字
+    MOV AH, 02H                                         ; 显示商，也就是十位
     INT 21H
-    MOV DL, DH
+    MOV DL, DH                                          ; 显示余数，也就是个位
     MOV AH, 02H
     INT 21H
 
@@ -126,7 +138,7 @@ INFO2:
     MOV AH, 09H
     INT 21H
 
-;***判断DIGIT是否是两位数
+;***判断DIGIT是否是两位数***
     MOV DL, DIGIT
     CMP DL, 10
     JNL DIGIT2
@@ -159,7 +171,7 @@ INFO3:
     MOV AH, 09H
     INT 21H
 
-;***判断COUNT是否是两位数
+;***判断COUNT是否是两位数***
     MOV DL, COUNT
     CMP DL, 10
     JNL COUNT2
@@ -192,14 +204,12 @@ INFO4:
     MOV AH, 09H
     INT 21H
 
-;***倒序输出
-    MOV CL, COUNT
-    MOV SI, 0
+;**********************倒序输出处理后的字符串*************************
+    MOV CL, COUNT                                           ; 循环初始化
 INVERSE:
-    POP DX
+    POP DX                                                  ; 从栈中取出来并显示
     MOV AH, 02H
     INT 21H
-    INC SI
     DEC CL
     JNZ INVERSE
 
@@ -211,31 +221,33 @@ INVERSE:
     MOV AH, 09H
     INT 21H
 
-    MOV DI, 2
+;**********************第二次输入，输入的字符显示*号*************************
+    MOV DI, 2                                               ; 相对寻址
 INPUT2:
-    MOV AH, 08H
+    MOV AH, 08H                                             ; 单个输入
     INT 21H
     CMP AL, 0DH
-    JZ  COMPARE
-    MOV PASSWORD2[DI], AL
-    INC DI
-    MOV DL, "*"
+    JZ  COMPARE                                             ; 输入回车则跳转
+    MOV PASSWORD2[DI], AL                                   ; 存到PASSWORD2中
+    INC DI                                                  ; 加
+    MOV DL, "*"                                             ; 显示*号。不过这有个小bug，当输入退格的时候也会被当做字符处理...
     MOV AH, 02H
     INT 21H
     JMP INPUT2
 
+;**********************密码校验*************************
 COMPARE:
     LEA DX, CRLF
     MOV AH, 09H
     INT 21H
 
-    MOV CX, 30
+    MOV CX, 30                                              ; 比较次数
 
     LEA SI, PASSWORD2+2
     LEA DI, PASSWORD+2
-    CLD
-    REPZ CMPSB
-    JNZ UNMATCH
+    CLD                                                     ; DI, SI同方向向前移动。（还有个STD，功能相反）
+    REPZ CMPSB                                              ; 比较SI与DI，比较CX次。
+    JNZ UNMATCH                                             ; 有不等于的时候，跳转到UNMATCH
 
 MATCH:
     LEA DX, RIGHT
@@ -248,6 +260,7 @@ UNMATCH:
     MOV AH, 09H
     INT 21H
 
+;**********************结束*************************
 RETURN:
     MOV AH, 4CH
     INT 21H
