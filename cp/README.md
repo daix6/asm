@@ -1,4 +1,10 @@
 ## Snake - Course Project
 ---
 
-Learning module and structure.
+
+### How to Run
+```Bash
+  masm *.asm
+  link snake.obj + init.obj + ...
+  xxx.exe
+```
