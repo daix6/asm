@@ -8,10 +8,7 @@ EXTRN  CLEAR:FAR
 EXTRN  DRAW:FAR
 
 ; direction
-EXTRN  UP:FAR
-EXTRN  LEFT:FAR
-EXTRN  DOWN:FAR
-EXTRN  RIGHT:FAR
+EXTRN  CHECK_DIRECTION:FAR
 
 ; data segment
 DATASG SEGMENT
@@ -39,7 +36,32 @@ DATASG SEGMENT
                 DB  "                   |          Copyright All Reserved        |", 0DH, 0AH
                 DB  "                   |                   2015                 |", 0DH, 0AH
                 DB  "                   |########################################|", 0DH, 0AH, '$'
-  
+
+
+  FAIL_INFO     DB  0DH, 0AH
+                DB  "                    ######################################## ", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |        I'm sorry, but you lose~        |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |         FFFFF           FFFFF          |", 0DH, 0AH
+                DB  "                   |       FFF   FFF       FFF   FFF        |", 0DH, 0AH
+                DB  "                   |     FFFF     FFFF   FFFF     FFFF      |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |           FF            FF             |", 0DH, 0AH
+                DB  "                   |           FFF          FFF             |", 0DH, 0AH
+                DB  "                   |              FFF    FFF                |", 0DH, 0AH
+                DB  "                   |                 FFFF                   |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |########################################|", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |          Copyright All Reserved        |", 0DH, 0AH
+                DB  "                   |                   2015                 |", 0DH, 0AH
+                DB  "                   |########################################|", 0DH, 0AH, '$'
+
   ; The blank area is 16 X 40, not including the border
   ; (2, 20)  to (2, 59)
   ; (17, 20) to (17, 59)
@@ -95,8 +117,9 @@ MAIN PROC   FAR
 
 INIT:
   CALL      CLEAR_R                     ; Clear register
-
   CALL      SET_MODE                    ; Set video mode
+
+GAME_START:
   CALL      CLEAR                       ; Clear the screen
 
   LEA       DX, START_SCREEN          
@@ -125,27 +148,75 @@ TIMER:
   INT       1AH                         ; Get time
   MOV       TIME, DX                    ; Save to memory
   MOV       AH, 01H
-  INT       16H                         ; Detect keyboard click
+  INT       16H                         ; Detect keyboard status
   JNZ       DIRECTION                   ; If detected, jump to `DIRECTION`
 
   MOV       DX, TIME                    ; DX = TIME
   SUB       DX, DI                      ; DX = DX - DI. Subtract last time to get the interval
   CMP       DX, INTERVAL                ; Compare DX with interval (we set before)
-  JA        AUTO_NEXT                   ; If DX > interval then jump to `AUTO_NEXT`. Which means that we don't click the keyboard.
+  JA        AUTO_NEXT                   ; If DX > interval then jump to `AUTO_NEXT`. Which means that user doesn't press the keyboard.
   JMP       TIMER                       ; If DX < interval, check again.
 
 AUTO_NEXT:
-  MOV       DI, TIME                    ; Save last move time to `DI`
+  MOV       DI, TIME                    ; Set current time to `DI`
   JMP       AUTO_SWIN                   ; Jump to `AUTO_SWIN`
 
 DIRECTION:
-  CALL      CHECK_DIRECTION
+  CALL      CHECK_DIRECTION             ; Check input direction
 
+UP:
+  MOV       DX, -1                      ; Row - 1
+  MOV       AL, [SI+1]                  ; AL = Row Number of Head
+  MOV       BL, [SI+3]                  ; BL = Row Number of first part of body
+  CMP       AL, 1                       ; If touch the border, end the game.
+  JZ        LOSE_GAME
+  JMP       NEXT_STEP
+
+LEFT:
+  MOV       BX, -1                      ; Col - 1
+  MOV       DX, 0
+  MOV       AL, [SI]                    ; AL = Col Number of Head
+  MOV       CL, [SI+2]                  ; CL = Col Number of first part of body
+  CMP       AL, 19                      ; If touch the border, end the game.
+  JZ        LOSE_GAME
+  JMP       NEXT_STEP
+
+DOWN:
+  MOV       DX, 1                       ; Row + 1
+  MOV       AL, [SI+1]                  ; AL = Row Number of Head
+  MOV       BL, [SI+3]                  ; BL = Row Number of first part of body
+  CMP       AL, 18                      ; If touch the border, end the game.
+  JZ        LOSE_GAME
+  JMP       NEXT_STEP
+
+RIGHT:
+  MOV       BX, -1                      ; Col + 1
+  MOV       DX, 0
+  MOV       AL, [SI]                    ; AL = Col Number of Head
+  MOV       CL, [SI+2]                  ; CL = Col Number of first part of body
+  CMP       AL, 60                      ; If touch the border, end the game.
+  JZ        LOSE_GAME
+  JMP       NEXT_STEP
+
+NEXT_STEP:
+  XOR       AX, AX                      ; Clear AX
+  LEA       SI, SNAKE                   ; SI point to the head
+  MOV       AL, LEN
+
+LOSE_GAME:
+  LEA       DX, FAIL_INFO
+  MOV       AH, 09H
+  INT       21H                         ; Draw the failure info
+  JMP       FINISH
+
+;============
 AUTO_SWIN:
 
 
+
 FINISH:
-  CALL      EXIT
+  MOV AH, 4CH
+  INT 21H
 
 MAIN ENDP
 
@@ -159,18 +230,6 @@ CLEAR_R PROC
   XOR       DI, DI
   RET
 CLEAR_R ENDP
-
-; Check what key user pressed
-CHECK_DIRECTION PROC
-  RET
-CHECK_DIRECTION ENDP
-
-; Return to DOS
-EXIT PROC
-  MOV AH, 4CH
-  INT 21H
-  RET
-EXIT ENDP
 
 CODESG0 ENDS
  END MAIN
