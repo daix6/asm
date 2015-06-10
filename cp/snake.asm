@@ -34,7 +34,7 @@ DATASG SEGMENT
                 DB  "                   |########################################|", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |          Copyright All Reserved        |", 0DH, 0AH
-                DB  "                   |                   2015                 |", 0DH, 0AH
+                DB  "                   |                  2015                  |", 0DH, 0AH
                 DB  "                   |########################################|", 0DH, 0AH, '$'
 
 
@@ -59,7 +59,7 @@ DATASG SEGMENT
                 DB  "                   |########################################|", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |          Copyright All Reserved        |", 0DH, 0AH
-                DB  "                   |                   2015                 |", 0DH, 0AH
+                DB  "                   |                  2015                  |", 0DH, 0AH
                 DB  "                   |########################################|", 0DH, 0AH, '$'
 
   ; The blank area is 16 X 40, not including the border.
@@ -98,7 +98,7 @@ DATASG SEGMENT
 
     COLOR       DB 6EH
 
-    INTERVAL    DW 0010H
+    INTERVAL    DW 000AH
     TIME        DW ?
 
 DATASG ENDS
@@ -121,29 +121,43 @@ INIT:
   CALL      CLEAR_R                     ; Clear register.
   CALL      SET_MODE                    ; Set video mode.
 
-GAME_START:
-  CALL      CLEAR                       ; Clear the screen.
 
-  LEA       DX, START_SCREEN          
+  MOV       AH, 00H
+  INT       1AH
+  MOV       DI, DX
+
+BOOTSTRAP:
+  CALL      CLEAR                       ; Clear the screen.
+  CALL      SET_CURSOR
+
+  LEA       DX, START_SCREEN
   MOV       AH, 09H
   INT       21H                         ; Show the bootstrap interface.
 
   MOV       AH, 07H
   INT       21H                         ; Wait and detect users' input.
-  XOR       AL, AL                      ; Clear input.
+  XOR       AX, AX                      ; Clear input.
 
-BEGIN:
-  MOV       DX, 0000H                   ; The start point (0, 0).
-  MOV       BH, 0                       ; 0.
-  MOV       AH, 02H                     ; Set the cursor's position.
-  INT       10H
+FISH:
+  CALL      CLEAR                       ; Clear the screen.
+  CALL      SET_CURSOR
 
   LEA       DX, WALL
   MOV       AH, 09H
   INT       21H                         ; Draw the wall.
 
-FIRST:
-  CALL      DRAW                        ; Draw the fish.
+  CALL      DRAW                        ; Draw the snake.
+  JMP       TIMER
+
+GAME_START:
+  CALL      CLEAR                       ; Clear the screen.
+  CALL      SET_CURSOR
+
+  LEA       DX, WALL
+  MOV       AH, 09H
+  INT       21H                         ; Draw the wall.
+
+  CALL      DRAW                        ; Draw the snake.
 
 TIMER:
   MOV       AH, 00H 
@@ -161,8 +175,7 @@ TIMER:
 
 AUTO_NEXT:
   MOV       DI, TIME                    ; Set current time to `DI`.
-  JMP       AUTO_SWIN                   ; Jump to `AUTO_SWIN`.
-
+  JMP       AUTO_SWIM                   ; Jump to `AUTO_SWIM`.
 
 ;=======================================For user's operation
 DIRECTION:
@@ -218,7 +231,7 @@ DOWN:
   JMP       NEXT_STEP
 
 RIGHT:
-  MOV       BX, -1                      ; Col + 1. Use `BX`.
+  MOV       BX, 1                      ; Col + 1. Use `BX`.
   MOV       DX, 0                       ; Set symbol for later judge.
   MOV       AL, [SI]                    ; AL = Col Number of Head.
   MOV       CL, [SI+2]                  ; CL = Col Number of first part of body.
@@ -250,49 +263,48 @@ MOVE_HEAD:
   CMP       DX, 0                       ; If DX = 1, means that up or down.
   JNE       MOVE_HEAD_UP_DOWN           ; Then jump to `MOVE_HEAD_UP_DOWN`.
 
-MOV_HEAD_LEFT_RIGHT:
+MOVE_HEAD_LEFT_RIGHT:
   ADD       [SI], BX                    ; Change Col of head. BX = ±1.
   JMP       GAME_START
 
-MOV_HEAD_UP_DOWN:
+MOVE_HEAD_UP_DOWN:
   ADD       [SI+1], DX                  ; Change Row of head. DX = ±1.
   JMP       GAME_START
 
 ;=======================================For auto operation.
-AUTO_SWIN:
+AUTO_SWIM:
   XOR       BX, BX                      ; Clear BX.
   LEA       SI, SNAKE
   MOV       BL, [SI]                    ; BL = Head's Col Number.
   CMP       BL, [SI+2]                  ; Compare Head's Col and first part of body's Col to judge head's direction.
   JNE       AUTO_LEFT_OR_RIGHT          ; If Cols are not equal, means left or right.
-  MOV       BH, [SI+1]                  ; BL = Head's Row Number.
+  MOV       BH, [SI+1]                  ; BH = Head's Row Number.
   CMP       BH, [SI+3]                  ; Compare Head's Row and first part of body's Row to judge up or down.
-  JA        AUTO_UP
+  JA        AUTO_DOWN
 
 ; BH For Row, BL for Col
-AUTO_DOWN:                              ; Towards Down: Row Increase, Col doesn't change.
-  MOV       BH, 1
-  MOV       BL, 0
-  JMP       AUTO_NEXT_STEP
-
 AUTO_UP:                                ; Towards Up: Row Decrease, Col doesn't change.
   MOV       BH, -1
   MOV       BL, 0
   JMP       AUTO_NEXT_STEP
 
+AUTO_DOWN:                              ; Towards Down: Row Increase, Col doesn't change.
+  MOV       BH, 1
+  MOV       BL, 0
+  JMP       AUTO_NEXT_STEP
+
 AUTO_LEFT_OR_RIGHT:
   CMP       BL, [SI+2]
-  JA        AUTO_LEFT                   ; If Head's Cols > first part of body's Col, measn left
+  JA        AUTO_RIGHT                  ; If Head's Cols > first part of body's Col, measn left
+
+AUTO_LEFT:                              ; Towards Left: Col Decrease, Row doesn't change.
+  MOV       BH, 0
+  MOV       BL, -1
+  JMP       AUTO_NEXT_STEP
 
 AUTO_RIGHT:                             ; Towards Right: Col Increase, Row doesn't change.
   MOV       BH, 0
   MOV       BL, 1
-  JMP       AUTO_NEXT_STEP
-
-AUTO_LEFT:                              ; Towards Right: Col Decrease, Row doesn't change.
-  MOV       BH, 0
-  MOV       BL, -1
-
 
 AUTO_NEXT_STEP:
   XOR       AX, AX                      ; Clear AX.
@@ -318,23 +330,24 @@ AUTO_MOVE_HEAD:
   LEA       SI, SNAKE
   ADD       [SI+1], BH
   ADD       [SI], BL
-  MOV       AL, [SI]
   MOV       AH, [SI+1]
+  MOV       AL, [SI]
 
 ;=======================================Judge If Touch The Border
 AUTO_BORDER:
   CMP       AH, 2
-  JZ        LOSE_GAME
+  JE        LOSE_GAME
   CMP       AH, 18
-  JZ        LOSE_GAME
+  JE        LOSE_GAME
   CMP       AL, 19
-  JZ        LOSE_GAME
+  JE        LOSE_GAME
   CMP       AL, 60
-  JZ        LOSE_GAME
+  JE        LOSE_GAME
   JMP       GAME_START
 
 ;=======================================If You Touch The Border
 LOSE_GAME:
+  CALL      SET_CURSOR
   LEA       DX, FAIL_INFO
   MOV       AH, 09H
   INT       21H                         ; Draw the failure info
@@ -356,6 +369,14 @@ CLEAR_R PROC
   XOR       DI, DI
   RET
 CLEAR_R ENDP
+
+SET_CURSOR PROC
+  MOV       DX, 0000H                   ; The start point (0, 0).
+  MOV       BH, 0                       ; 0.
+  MOV       AH, 02H                     ; Set the cursor's position.
+  INT       10H
+  RET
+SET_CURSOR ENDP
 
 CODESG0 ENDS
  END MAIN
