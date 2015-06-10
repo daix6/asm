@@ -1,8 +1,8 @@
-; variables
-PUBLIC START_SCREEN, WALL
+; share
+PUBLIC START_SCREEN, WALL, COLOR
 PUBLIC SNAKE, LEN
 
-; modules
+; call
 EXTRN  SET_MODE:FAR
 EXTRN  CLEAR:FAR
 EXTRN  DRAW:FAR
@@ -12,7 +12,7 @@ EXTRN  DRAW:FAR
 DATASG SEGMENT
 
   START_SCREEN  DB  0DH, 0AH
-                DB  "                    ________________________________________ ", 0DH, 0AH
+                DB  "                    ######################################## ", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |          Welcome To The Snake          |", 0DH, 0AH
@@ -28,15 +28,18 @@ DATASG SEGMENT
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
-                DB  "                   |________________________________________|", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |########################################|", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |          Copyright All Reserved        |", 0DH, 0AH
                 DB  "                   |                   2015                 |", 0DH, 0AH
-                DB  "                   |________________________________________|", 0DH, 0AH, '$'
+                DB  "                   |########################################|", 0DH, 0AH, '$'
   
   ; The blank area is 16 X 40, not including the border
+  ; (2, 20)  ... (2, 59)
+  ; (17, 20) ... (17, 59)
   WALL          DB  0DH, 0AH
-                DB  "                    ________________________________________ ", 0DH, 0AH
+                DB  "                    ######################################## ", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
@@ -52,14 +55,17 @@ DATASG SEGMENT
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
-                DB  "                   |________________________________________|", 0DH, 0AH
+                DB  "                   |                                        |", 0DH, 0AH
+                DB  "                   |########################################|", 0DH, 0AH
                 DB  "                   |                                        |", 0DH, 0AH
                 DB  "                   |     W:Up  A:Left S: Down D: Right      |", 0DH, 0AH
                 DB  "                   |          Esc To End The Game           |", 0DH, 0AH
-                DB  "                   |________________________________________|", 0DH, 0AH, '$'
+                DB  "                   |########################################|", 0DH, 0AH, '$'
 
     LEN         DB 8
-    SNAKE       DW 0A23H, 0A24H, 0A25H, 0A26H, 0A27H, 0A28H, 0A29H, 0A2AH, 0
+    SNAKE       DW 0A24H, 0A25H, 0A26H, 0A27H, 0A28H, 0A29H, 0A2AH, 0A2BH, 0
+
+    COLOR       DB 6EH
 
 DATASG ENDS
 
@@ -78,27 +84,28 @@ MAIN PROC   FAR
   MOV       DS, AX
 
 INIT:
-  CALL      SET_MODE                  ; Set video mode
-  CALL      CLEAR                     ; Clear the screen
+  CALL      SET_MODE                    ; Set video mode
+  CALL      CLEAR                       ; Clear the screen
 
   LEA       DX, START_SCREEN          
   MOV       AH, 09H
-  INT       21H                       ; Show the bootstrap interface
+  INT       21H                         ; Show the bootstrap interface
 
   MOV       AH, 07H
-  INT       21H                       ; Wait and detect users' input.
-  XOR       AL, AL
+  INT       21H                         ; Wait and detect users' input.
+  XOR       AL, AL                      ; Clear input
 
 BEGIN:
-  MOV       DX, 0000H
-  MOV       BH, 0
-  MOV       AH, 2
-  INT       10H                        ; Redraw to cover
+  MOV       DX, 0000H                   ; The start point (0, 0)
+  MOV       BH, 0                       ; 0
+  MOV       AH, 02H                     ; Set the cursor's position
+  INT       10H
+
   LEA       DX, WALL
   MOV       AH, 09H
-  INT       21H
+  INT       21H                         ; Draw the wall
 
-  CALL      DRAW
+  CALL      DRAW                        ; Draw the fish
 
 FINISH:
   CALL      EXIT

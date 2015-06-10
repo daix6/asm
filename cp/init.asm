@@ -1,3 +1,5 @@
+EXTRN COLOR:BYTE
+
 PUBLIC SET_MODE, CLEAR
 
 CODESG1 SEGMENT
@@ -15,7 +17,7 @@ CODESG1 SEGMENT
   CLEAR PROC      FAR
     MOV       AH, 06                  ; Select scroll function
     MOV       AL, 00                  ; The entire page
-    MOV       BH, 6EH                 ; For initial color
+    MOV       BH, COLOR               ; For initial color
     MOV       CH, 00                  ; Row value of start point
     MOV       CL, 00                  ; Column value of start point
     MOV       DH, 24                  ; Row value of ending point
