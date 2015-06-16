@@ -31,10 +31,11 @@ DATASG SEGMENT
   LIGHT_INDEX   DB 0
   ROW           DB 0
   DEALY_PIECE   DB 0
-  DEALY_ALL     DB 0
+  LOOP_TIME     DB 0
 
   TABLE         DW 524,588,660,698,784,880,988,1048
   SONG          DB 1, 2, 3, 1, 2, 3, 1, 2, 3, 4, 5
+
 DATASG ENDS
 
 STACKSG SEGMENT
@@ -56,7 +57,7 @@ INIT:
   LEA       DX, INPUT
   MOV       AH, 25H
   MOV       AL, 0BH
-  INT       21H
+  INT       21H                 ; 中断
 
   MOV       CX, 0
   IN        AL, 21H
@@ -94,7 +95,7 @@ WHICH_GROUP:
   INC       CL
   JNC       WHICH_GROUP             ; 判断是第几组被按下
 
-  MOV       BX, LED
+  LEA       BX, LED
   MOV       AL, CL
   XLAT
   MOV       DX, IO8255A
@@ -104,7 +105,7 @@ WHICH_GROUP:
 ;*******************************************************
 PART_MUSIC:
   PUSH      AX
-  
+
   LEA       SI, SONG
   MOV       CX, 12
 SING:
@@ -142,9 +143,12 @@ X2:
   JNZ       X1
   POP       AX
   POP       CX
-;
+
   MOV       AL, 0H                  ; close bell
   OUT       DX, AL
+
+  INC       SI
+  LOOP      SING
 
   POP       AX
 
@@ -168,7 +172,7 @@ DISPLAY_88:
   MOV       AH, 80H                 ; 8th column. Right->Left
   MOV       CL, 08H                 ; 8 columns
   
-  MOV       AL, 0
+  MOV       AL, LOOP_TIME
   MOV       ROW, AL
 NEXT_COL:
   MOV       AL, ROW
@@ -193,6 +197,10 @@ REPEAT_SAME:
   JNZ       DISPLAY_88
 
   MOV       DEALY_PIECE, 0
+  INC       LOOP_TIME
+  CMP       LOOP_TIME, 40           ; 5*8
+  JNE       DISPLAY_LIGHT
+  MOV       LOOP_TIME, 0
 
 DISPLAY_LIGHT:
   MOV       DX, IO273
