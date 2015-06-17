@@ -6,7 +6,6 @@ DATASG SEGMENT
   IO8253A       EQU 2B0H
   PROTH         EQU 280H
   PROTLR        EQU 288H
-  IO244         EQU 2A8H
   IO273         EQU 2A0H
 
   LED           DB  3FH, 06H, 5BH, 4FH ,66H, 6DH ,7DH, 07H, 7FH, 6FH
@@ -21,10 +20,59 @@ DATASG SEGMENT
                 DB  10000001B, 11000011B, 11100111B, 11111111B, 11100111B, 11000011B, 10000001B, 00000000B
 
   MATRIX        DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
-                DB  1H, 2H, 3CH, 20H, 0A0H, 60H, 20H, 20H           ;广
-                DB  14H, 0F8H, 20H, 10H, 7CH, 20H, 10H, 0FEH        ;州
-                DB  0H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H          ;大
-                DB  20H, 0F0H, 24H, 0F4H, 3FH, 0F4H, 24H, 70H       ;学
+                DB  00H, 00H, 00H, 0FFH, 0FFH, 00H, 00H,00H           ; 1
+                DB  00H, 00H, 3FH,0C8H, 0C8H, 3FH, 00H, 00H           ; A
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H           ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H             ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 9FH,99H, 99H, 99H, 99H, 0f9H, 00H            ; 2
+                DB  00H, 0ffH, 0ffH, 99H, 99H, 99H, 7eH, 00H          ; B
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H           ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H             ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 99H, 99H, 99H, 99H, 99H, 0FFH, 00H            ; 3
+                DB  00H, 7EH, 0FFH, 81H, 81H, 81H, 81H, 00H            ; C
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                                
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 0F8H, 08H, 08H, 0FFH, 08H, 08H, 00H           ; 4
+                DB  00H, 0FFH, 0FFH, 81H, 81H, 81H, 7EH, 00H           ; D
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                        
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 0F9H, 99H, 99H, 99H, 99H, 9FH, 00H            ; 5
+                DB  00H, 0FFH, 99H, 99H, 99H, 99H, 99H, 00H            ; E
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                        
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 0FFH, 99H, 99H, 99H, 99H, 9FH, 00H            ; 6
+                DB  00H, 0FFH, 0C8H, 0C8H, 0C8H, 0C8H, 0C8H, 00H       ; F
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                     
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 80H, 80H, 8FH, 90H, 0A0H, 0C0H, 00H           ; 7
+                DB  00H, 7EH, 81H, 81H, 89H, 8EH, 48H, 0EH             ; G
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
+                        
+                DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H          
+                DB  00H, 0FFH, 99H, 99H, 99H, 99H, 0FFH, 00H           ; 8
+                DB  00H, 0FFH, 0FFH, 18H, 18H, 0FFH, 0FFH, 00H         ; H
+                DB  00H, 11H, 12H, 14H, 0F8H, 14H, 12H, 11H            ; 大
+                DB  00H, 08H, 04H, 02H, 04H, 08H, 10H,20H              ; V
                 DB  00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H
 
   GROUP_ID      DB 0
@@ -32,9 +80,10 @@ DATASG SEGMENT
   ROW           DB 0
   DEALY_PIECE   DB 0
   LOOP_TIME     DB 0
+  TEMP          DB 0
 
-  TABLE         DW 524,588,660,698,784,880,988,1048
-  SONG          DB 1, 2, 3, 1, 2, 3, 1, 2, 3, 4, 5
+  M_TABLE       DW 524,588,660,698,784,880,988,1048
+  SONG          DB '1','2','3','1','2','3','1','2', '3', '4', '5'
 
 DATASG ENDS
 
@@ -44,31 +93,31 @@ STACKSG ENDS
 
 CODESG SEGMENT
   ASSUME DS:DATASG, SS:STACKSG, CS:CODESG
+START:
   MOV       AX, DATASG
   MOV       DS, AX
 
 INIT:
   MOV       DX, IO8255
   MOV       AX, 89H
-  OUT       DX, AX              ; 设8255为A口输出,C口输入
+  OUT       DX, AX              ; set the way of 8255, c-in-a-out
 
   MOV       AX, CS
   MOV       DS, AX
   LEA       DX, INPUT
-  MOV       AH, 25H
-  MOV       AL, 0BH
-  INT       21H                 ; 中断
+  MOV       AX, 250BH
+  INT       21H                 ; set interrupt
 
-  MOV       CX, 0
+  MOV       CX, 00H
   IN        AL, 21H
   AND       AL, 0F7H
   OUT       21H, AL
   STI
 
 DETECT:
-  CMP       CX, 0
+  CMP       CX, 00H
   JE        DETECT
-  CMP       CX, 1
+  CMP       CX, 01H
   JE        NOINPUT
 
 INPUT:
@@ -82,38 +131,43 @@ NOINPUT:
   MOV       DS, AX
   MOV       DX, IO8255C
   IN        AL, DX
-  CMP       AL, 0
-  JE        NOINPUT
+  CMP       AL, 0H
+  JZ        NOINPUT
 
 ;*******************************************************
 PART_LED:
   PUSH      AX
-  MOV       CX, 00FFH               ; 计数器，初始值为-1
+  MOV       CX, 00FFH               ; CX = -1
 
 WHICH_GROUP:
   SHR       AL, 1
   INC       CL
-  JNC       WHICH_GROUP             ; 判断是第几组被按下
+  JNC       WHICH_GROUP
 
   LEA       BX, LED
   MOV       AL, CL
   XLAT
   MOV       DX, IO8255A
   OUT       DX, AL
-  POP       AX
+  
+  AND       AL, 7FH
+  MOV       TEMP, AL
 
-;*******************************************************
+;******************************************************
 PART_MUSIC:
-  PUSH      AX
-
   LEA       SI, SONG
-  MOV       CX, 12
+  
+  MOV       CX, 0BH
 SING:
-  XOR       BX, BX
-  MOV       BX, [SI]
+  MOV       AL, [SI]
+  SUB       AL, 31H
+  SHL       AL, 1
+  MOV       BL, AL
+  MOV       BH, 0
+
   MOV       AX, 4240H
   MOV       DX, 0FH
-  DIV       WORD PTR[TABLE+BX]
+  DIV       WORD PTR[M_TABLE+BX]
   MOV       BX, AX
 
   MOV       DX, IO8253
@@ -127,15 +181,17 @@ SING:
   MOV       AL, AH
   OUT       DX, AL
 
-  MOV       DX, IO244                   ; open bell
-  MOV       AL, 03H
-  OUT       DX, AL
-;delay
+  MOV       DX, IO8255A
+  MOV       AL, TEMP
+  OR        AL, 80H
+  OUT       DX, AL                  ; Open bell
+
+; delay
   PUSH      CX
-  PUSH      AX
-  MOV       AX, 15
+  PUSH      AX AX
+  MOV       AX, 077H
 X1:
-  MOV       CX, 0FFFFH
+  MOV       CX, 0FFFFh
 X2:
   DEC       CX
   JNZ       X2
@@ -144,25 +200,27 @@ X2:
   POP       AX
   POP       CX
 
-  MOV       AL, 0H                  ; close bell
-  OUT       DX, AL
+  MOV       DX, IO8255A
+  MOV       AL, TEMP
+  OUT       DX, AL                  ; Close bell
 
   INC       SI
-  LOOP      SING
+  DEC       CX
+  JNZ       SING
 
+;******************************************************
   POP       AX
-
 ;*******************************************************
 PART_88_AND_LIGHT:
   PUSH      AX
 
   LEA       BX, MATRIX
   SUB       BX, 48                  ; 6*8
-
+  MOV       CX, 00FFH
 WHICH_GROUP2:
+  ADD       BX, 48
   SHR       AL, 1
   INC       CL
-  ADD       BX, 48
   JNC       WHICH_GROUP2
 
   MOV       GROUP_ID, CL
@@ -249,6 +307,7 @@ FINISH_88:
   POP       AX
 
 ;************************************************
+
 FINISH:
   MOV       AL, 0
   MOV       DX, IO273
@@ -263,4 +322,4 @@ FINISH:
   INT       21H
 
 CODESG ENDS
-       END
+END    START
