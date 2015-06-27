@@ -108,7 +108,7 @@ STACKSG ENDS
 ; code segment
 CODESG0 SEGMENT
 
-; 
+;
 MAIN PROC   FAR
   ASSUME    CS:CODESG0, DS:DATASG, SS:STACKSG
   MOV       AX, DATASG
@@ -157,7 +157,7 @@ GAME_START:
   CALL      DRAW                        ; Draw the snake.
 
 TIMER:
-  MOV       AH, 00H 
+  MOV       AH, 00H
   INT       1AH                         ; Get time.
   MOV       TIME, DX                    ; Save to memory.
   MOV       AH, 01H
@@ -206,7 +206,7 @@ UP:
   MOV       DX, -1                      ; Row - 1. Use `DX`.
   MOV       AL, [SI+1]                  ; AL = Row Number of Head.
   MOV       BL, [SI+3]                  ; BL = Row Number of first part of body.
-  CMP       AL, 1                       ; If touch the border, end the game.
+  CMP       AL, 2                       ; If touch the border, end the game.
   JZ        LOSE_GAME
   JMP       NEXT_STEP
 
@@ -215,7 +215,7 @@ LEFT:
   MOV       DX, 0                       ; Set symbol for later judge.
   MOV       AL, [SI]                    ; AL = Col Number of Head.
   MOV       CL, [SI+2]                  ; CL = Col Number of first part of body.
-  CMP       AL, 19                      ; If touch the border, end the game.
+  CMP       AL, 20                      ; If touch the border, end the game.
   JZ        LOSE_GAME
   JMP       NEXT_STEP
 
@@ -223,7 +223,7 @@ DOWN:
   MOV       DX, 1                       ; Row + 1. Use `DX`.
   MOV       AL, [SI+1]                  ; AL = Row Number of Head.
   MOV       BL, [SI+3]                  ; BL = Row Number of first part of body.
-  CMP       AL, 18                      ; If touch the border, end the game.
+  CMP       AL, 17                      ; If touch the border, end the game.
   JZ        LOSE_GAME
   JMP       NEXT_STEP
 
@@ -232,7 +232,7 @@ RIGHT:
   MOV       DX, 0                       ; Set symbol for later judge.
   MOV       AL, [SI]                    ; AL = Col Number of Head.
   MOV       CL, [SI+2]                  ; CL = Col Number of first part of body.
-  CMP       AL, 60                      ; If touch the border, end the game.
+  CMP       AL, 59                      ; If touch the border, end the game.
   JZ        LOSE_GAME
   JMP       NEXT_STEP
 
@@ -332,7 +332,7 @@ AUTO_MOVE_HEAD:
 
 ;=======================================Judge If Touch The Border
 AUTO_BORDER:
-  CMP       AH, 2
+  CMP       AH, 1
   JE        LOSE_GAME
   CMP       AH, 18
   JE        LOSE_GAME
